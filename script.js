@@ -1,3 +1,89 @@
+// Particles animation
+const canvas = document.getElementById('particlesCanvas');
+const ctx = canvas.getContext('2d');
+
+let particles = [];
+let animationFrameId;
+let isReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+
+class Particle {
+    constructor() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.size = Math.random() * 3 + 1;
+        this.speedX = Math.random() * 0.5 - 0.25;
+        this.speedY = Math.random() * 0.5 - 0.25;
+        this.opacity = Math.random() * 0.5 + 0.2;
+    }
+
+    update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+
+        if (this.x > canvas.width) this.x = 0;
+        if (this.x < 0) this.x = canvas.width;
+        if (this.y > canvas.height) this.y = 0;
+        if (this.y < 0) this.y = canvas.height;
+    }
+
+    draw() {
+        ctx.fillStyle = `rgba(0, 102, 255, ${this.opacity})`;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
+    }
+}
+
+function initParticles() {
+    if (isReducedMotion) return;
+
+    particles = [];
+    const particleCount = window.innerWidth < 768 ? 30 : 50;
+
+    for (let i = 0; i < particleCount; i++) {
+        particles.push(new Particle());
+    }
+}
+
+function animateParticles() {
+    if (isReducedMotion) return;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    particles.forEach(particle => {
+        particle.update();
+        particle.draw();
+    });
+
+    animationFrameId = requestAnimationFrame(animateParticles);
+}
+
+// Initialize particles
+resizeCanvas();
+initParticles();
+animateParticles();
+
+window.addEventListener('resize', () => {
+    resizeCanvas();
+    initParticles();
+});
+
+// Pause particles when tab is hidden
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+        if (animationFrameId) {
+            cancelAnimationFrame(animationFrameId);
+        }
+    } else {
+        animateParticles();
+    }
+});
+
 // Modal and form handling
 const modal = document.getElementById('purchaseModal');
 const modalClose = document.getElementById('modalClose');
@@ -19,16 +105,18 @@ document.querySelectorAll('.btn-buy').forEach(button => {
         const card = this.closest('.product-card');
         const productName = card.querySelector('.product-name').textContent;
         const productPrice = card.querySelector('.product-price').textContent;
-        const productIcon = card.querySelector('.product-image').textContent;
+        const productIconSvg = card.querySelector('.product-image svg').cloneNode(true);
 
         currentProduct = {
             name: productName,
             price: productPrice,
-            icon: productIcon
+            icon: productIconSvg
         };
 
         // Update modal content
-        modalProductInfo.querySelector('.product-info-icon').textContent = productIcon;
+        const modalIconContainer = modalProductInfo.querySelector('.product-info-icon');
+        modalIconContainer.innerHTML = '';
+        modalIconContainer.appendChild(productIconSvg);
         modalProductInfo.querySelector('.product-info-name').textContent = productName;
         modalProductInfo.querySelector('.product-info-price').textContent = productPrice;
 
@@ -71,7 +159,12 @@ purchaseForm.addEventListener('submit', (e) => {
     const modalBody = document.querySelector('.modal-body');
     modalBody.innerHTML = `
         <div style="text-align: center; padding: 2rem 0;">
-            <div style="font-size: 4rem; margin-bottom: 1rem;">✅</div>
+            <div style="width: 80px; height: 80px; margin: 0 auto 1.5rem; display: flex; align-items: center; justify-content: center;">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#0066FF" stroke-width="2">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                </svg>
+            </div>
             <h3 style="font-family: var(--font-display); font-size: 1.5rem; font-weight: 600; color: var(--color-black); margin-bottom: 1rem;">
                 Заявка отправлена!
             </h3>

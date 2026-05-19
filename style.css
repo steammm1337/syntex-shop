@@ -51,6 +51,15 @@ body {
     opacity: 1;
 }
 
+#particlesCanvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
 .octopus-decoration {
     position: absolute;
     bottom: 10%;
@@ -117,8 +126,8 @@ body {
     text-decoration: none;
 }
 
-.logo-icon {
-    font-size: 1.75rem;
+.logo svg {
+    color: var(--color-primary);
     animation: float 3s ease-in-out infinite;
 }
 
@@ -241,7 +250,9 @@ body {
 }
 
 .hero-badge {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
     padding: 0.75rem 1.5rem;
     background: rgba(255, 255, 255, 0.9);
     backdrop-filter: blur(10px);
@@ -252,6 +263,10 @@ body {
     color: var(--color-primary);
     margin-bottom: 2rem;
     animation: fadeInUp 1s var(--transition-smooth) 0.4s backwards;
+}
+
+.hero-badge svg {
+    color: var(--color-primary);
 }
 
 .hero-title {
@@ -442,9 +457,18 @@ body {
 }
 
 .feature-icon {
-    font-size: 3rem;
+    width: 64px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     margin-bottom: 1.5rem;
-    display: block;
+    color: var(--color-primary);
+}
+
+.feature-icon svg {
+    width: 48px;
+    height: 48px;
 }
 
 .feature-title {
@@ -519,12 +543,27 @@ body {
     font-size: 0.75rem;
     font-weight: 600;
     border-radius: 50px;
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+}
+
+.product-badge svg {
+    width: 16px;
+    height: 16px;
 }
 
 .product-image {
-    font-size: 4rem;
-    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     margin: 1.5rem 0 2rem;
+    color: var(--color-primary);
+}
+
+.product-image svg {
+    width: 80px;
+    height: 80px;
 }
 
 .product-name {
@@ -605,6 +644,13 @@ body {
     font-size: 1.125rem;
     font-weight: 500;
     color: var(--color-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.about-feature svg {
+    flex-shrink: 0;
 }
 
 .about-visual {
@@ -655,8 +701,18 @@ body {
 }
 
 .contact-icon {
-    font-size: 3rem;
-    margin-bottom: 1.5rem;
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    color: var(--color-primary);
+}
+
+.contact-icon svg {
+    width: 48px;
+    height: 48px;
 }
 
 .contact-title {
@@ -700,6 +756,10 @@ body {
     font-family: var(--font-display);
     font-size: 1.5rem;
     font-weight: 700;
+}
+
+.footer-logo svg {
+    color: var(--color-white);
 }
 
 .footer-tagline {
@@ -811,8 +871,18 @@ body {
 }
 
 .modal-icon {
-    font-size: 4rem;
-    margin-bottom: 1rem;
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    color: var(--color-primary);
+}
+
+.modal-icon svg {
+    width: 64px;
+    height: 64px;
 }
 
 .modal-title {
@@ -837,7 +907,17 @@ body {
 }
 
 .product-info-icon {
-    font-size: 3rem;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-primary);
+}
+
+.product-info-icon svg {
+    width: 48px;
+    height: 48px;
 }
 
 .product-info-details {
@@ -958,6 +1038,7 @@ body {
 
     .hero-section {
         padding: 6rem 1.5rem 3rem;
+        min-height: 100vh;
     }
 
     .hero-title {
@@ -976,6 +1057,7 @@ body {
 
     .hero-stats {
         gap: 2rem;
+        flex-direction: column;
     }
 
     .stat-value {
@@ -1008,10 +1090,15 @@ body {
         font-size: 50px;
     }
 
-    .video-container {
-        width: 85vw;
-        height: 85vw * 16 / 9;
-        max-height: 70vh;
+    /* Optimize animations for mobile */
+    .feature-card,
+    .product-card {
+        transition: all 0.3s var(--transition-smooth);
+    }
+
+    .feature-card:hover,
+    .product-card:hover {
+        transform: translateY(-4px);
     }
 }
 
