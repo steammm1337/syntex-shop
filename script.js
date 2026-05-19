@@ -1,20 +1,109 @@
-// Scroll-based video switching and animations
-let currentVideoIndex = 1;
-let lastScrollY = 0;
-let ticking = false;
+// Modal and form handling
+const modal = document.getElementById('purchaseModal');
+const modalClose = document.getElementById('modalClose');
+const purchaseForm = document.getElementById('purchaseForm');
+const telegramInput = document.getElementById('telegramInput');
+const modalProductInfo = document.getElementById('modalProductInfo');
 
-const video1 = document.getElementById('video1');
-const video2 = document.getElementById('video2');
-const videoContainer = document.getElementById('videoContainer');
-const staticBg = document.getElementById('staticBg');
-const navbar = document.querySelector('.navbar');
-const mobileMenuToggle = document.getElementById('mobileMenuToggle');
-const mobileMenu = document.getElementById('mobileMenu');
+let currentProduct = {
+    name: '',
+    price: '',
+    icon: ''
+};
 
-// Preload second video
-video2.load();
+// Open modal when buy button clicked
+document.querySelectorAll('.btn-buy').forEach(button => {
+    button.addEventListener('click', function(e) {
+        e.preventDefault();
+
+        const card = this.closest('.product-card');
+        const productName = card.querySelector('.product-name').textContent;
+        const productPrice = card.querySelector('.product-price').textContent;
+        const productIcon = card.querySelector('.product-image').textContent;
+
+        currentProduct = {
+            name: productName,
+            price: productPrice,
+            icon: productIcon
+        };
+
+        // Update modal content
+        modalProductInfo.querySelector('.product-info-icon').textContent = productIcon;
+        modalProductInfo.querySelector('.product-info-name').textContent = productName;
+        modalProductInfo.querySelector('.product-info-price').textContent = productPrice;
+
+        // Open modal
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+
+        // Focus input
+        setTimeout(() => telegramInput.focus(), 300);
+    });
+});
+
+// Close modal
+function closeModal() {
+    modal.classList.remove('active');
+    document.body.style.overflow = '';
+    purchaseForm.reset();
+}
+
+modalClose.addEventListener('click', closeModal);
+
+modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+        closeModal();
+    }
+});
+
+// Handle form submission
+purchaseForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    const telegram = telegramInput.value.trim();
+
+    if (!telegram) {
+        telegramInput.focus();
+        return;
+    }
+
+    // Show success message
+    const modalBody = document.querySelector('.modal-body');
+    modalBody.innerHTML = `
+        <div style="text-align: center; padding: 2rem 0;">
+            <div style="font-size: 4rem; margin-bottom: 1rem;">✅</div>
+            <h3 style="font-family: var(--font-display); font-size: 1.5rem; font-weight: 600; color: var(--color-black); margin-bottom: 1rem;">
+                Заявка отправлена!
+            </h3>
+            <p style="color: var(--color-gray-600); margin-bottom: 2rem;">
+                Мы свяжемся с вами в Telegram <strong>@${telegram}</strong> в ближайшее время для завершения покупки.
+            </p>
+            <button class="btn btn-primary" onclick="document.getElementById('modalClose').click()">
+                Вернуться в магазин
+            </button>
+        </div>
+    `;
+
+    // Log to console (replace with actual API call)
+    console.log('Order submitted:', {
+        product: currentProduct,
+        telegram: telegram,
+        timestamp: new Date().toISOString()
+    });
+});
+
+// Keyboard shortcuts
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal.classList.contains('active')) {
+        closeModal();
+    }
+});
 
 // Mobile menu toggle
+const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+const mobileMenu = document.getElementById('mobileMenu');
+const navbar = document.querySelector('.navbar');
+
 mobileMenuToggle.addEventListener('click', () => {
     mobileMenu.classList.toggle('active');
     const spans = mobileMenuToggle.querySelectorAll('span');
@@ -41,22 +130,24 @@ document.querySelectorAll('.mobile-link').forEach(link => {
     });
 });
 
-// Scroll handler for video switching and animations
+// Scroll handler for navbar and animations
+let lastScrollY = 0;
+let ticking = false;
+
 function handleScroll() {
     lastScrollY = window.scrollY;
 
     if (!ticking) {
         window.requestAnimationFrame(() => {
-            updateVideoAndAnimations();
+            updateAnimations();
             ticking = false;
         });
         ticking = true;
     }
 }
 
-function updateVideoAndAnimations() {
+function updateAnimations() {
     const scrollY = lastScrollY;
-    const windowHeight = window.innerHeight;
 
     // Navbar scroll effect
     if (scrollY > 50) {
@@ -65,56 +156,8 @@ function updateVideoAndAnimations() {
         navbar.classList.remove('scrolled');
     }
 
-    // Video switching logic
-    // First screen (0 - 1vh): video1
-    // Second screen (1vh - 2vh): video2
-    // After 2vh: fade to static background
-
-    if (scrollY < windowHeight * 0.8) {
-        // First screen - show video1
-        if (currentVideoIndex !== 1) {
-            switchToVideo(1);
-        }
-        videoContainer.style.opacity = '1';
-        staticBg.classList.remove('active');
-    } else if (scrollY >= windowHeight * 0.8 && scrollY < windowHeight * 1.8) {
-        // Second screen - show video2
-        if (currentVideoIndex !== 2) {
-            switchToVideo(2);
-        }
-        videoContainer.style.opacity = '1';
-        staticBg.classList.remove('active');
-    } else {
-        // After second screen - fade to static background
-        const fadeStart = windowHeight * 1.8;
-        const fadeEnd = windowHeight * 2.2;
-        const fadeProgress = Math.min(1, (scrollY - fadeStart) / (fadeEnd - fadeStart));
-
-        videoContainer.style.opacity = 1 - fadeProgress;
-
-        if (fadeProgress > 0.3) {
-            staticBg.classList.add('active');
-        }
-    }
-
     // Scroll animations for elements
     animateOnScroll();
-}
-
-function switchToVideo(index) {
-    currentVideoIndex = index;
-
-    if (index === 1) {
-        video1.classList.add('active');
-        video2.classList.remove('active');
-        video1.play().catch(e => console.log('Video 1 play failed:', e));
-        video2.pause();
-    } else if (index === 2) {
-        video2.classList.add('active');
-        video1.classList.remove('active');
-        video2.play().catch(e => console.log('Video 2 play failed:', e));
-        video1.pause();
-    }
 }
 
 // Intersection Observer for scroll animations
@@ -122,14 +165,6 @@ const observerOptions = {
     threshold: 0.1,
     rootMargin: '0px 0px -100px 0px'
 };
-
-const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-        if (entry.isIntersecting) {
-            entry.target.classList.add('visible');
-        }
-    });
-}, observerOptions);
 
 function animateOnScroll() {
     // Feature cards
@@ -186,28 +221,13 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
 // Initialize
 window.addEventListener('scroll', handleScroll, { passive: true });
 window.addEventListener('load', () => {
-    // Start first video
-    video1.play().catch(e => console.log('Initial video play failed:', e));
-
     // Initial animation check
-    updateVideoAndAnimations();
+    updateAnimations();
 
     // Add scroll animate class to sections
     document.querySelectorAll('.section-title, .section-subtitle').forEach(el => {
         el.classList.add('scroll-animate');
     });
-});
-
-// Handle video errors gracefully
-video1.addEventListener('error', (e) => {
-    console.error('Video 1 error:', e);
-    // Fallback to static background if video fails
-    videoContainer.style.display = 'none';
-    staticBg.classList.add('active');
-});
-
-video2.addEventListener('error', (e) => {
-    console.error('Video 2 error:', e);
 });
 
 // Parallax effect for decorative elements
@@ -241,23 +261,6 @@ window.addEventListener('load', () => {
 });
 
 // Counter animation for stats
-function animateCounter(element, target, duration = 2000) {
-    const start = 0;
-    const increment = target / (duration / 16);
-    let current = start;
-
-    const timer = setInterval(() => {
-        current += increment;
-        if (current >= target) {
-            element.textContent = target;
-            clearInterval(timer);
-        } else {
-            element.textContent = Math.floor(current);
-        }
-    }, 16);
-}
-
-// Trigger counter animation when stats are visible
 const statsObserver = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
         if (entry.isIntersecting) {
@@ -318,64 +321,6 @@ document.querySelectorAll('.product-card').forEach(card => {
         const icon = this.querySelector('.product-image');
         icon.style.transform = 'scale(1) rotate(0deg)';
     });
-});
-
-// Add click handlers for buy buttons
-document.querySelectorAll('.btn-buy').forEach(button => {
-    button.addEventListener('click', function(e) {
-        e.preventDefault();
-
-        // Create ripple effect
-        const ripple = document.createElement('span');
-        ripple.style.position = 'absolute';
-        ripple.style.width = '20px';
-        ripple.style.height = '20px';
-        ripple.style.background = 'rgba(255, 255, 255, 0.6)';
-        ripple.style.borderRadius = '50%';
-        ripple.style.transform = 'scale(0)';
-        ripple.style.animation = 'ripple 0.6s ease-out';
-
-        const rect = this.getBoundingClientRect();
-        ripple.style.left = (e.clientX - rect.left - 10) + 'px';
-        ripple.style.top = (e.clientY - rect.top - 10) + 'px';
-
-        this.style.position = 'relative';
-        this.style.overflow = 'hidden';
-        this.appendChild(ripple);
-
-        setTimeout(() => ripple.remove(), 600);
-
-        // Show alert (replace with actual purchase logic)
-        setTimeout(() => {
-            alert('Функция покупки будет доступна в ближайшее время! 🎮');
-        }, 300);
-    });
-});
-
-// Add ripple animation
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes ripple {
-        to {
-            transform: scale(4);
-            opacity: 0;
-        }
-    }
-`;
-document.head.appendChild(style);
-
-// Performance optimization: pause videos when not visible
-document.addEventListener('visibilitychange', () => {
-    if (document.hidden) {
-        video1.pause();
-        video2.pause();
-    } else {
-        if (currentVideoIndex === 1) {
-            video1.play().catch(e => console.log('Resume video 1 failed:', e));
-        } else if (currentVideoIndex === 2) {
-            video2.play().catch(e => console.log('Resume video 2 failed:', e));
-        }
-    }
 });
 
 // Reduce motion for users who prefer it

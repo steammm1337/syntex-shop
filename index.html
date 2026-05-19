@@ -10,19 +10,48 @@
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="video-container" id="videoContainer">
-        <video id="video1" class="background-video active" autoplay muted loop playsinline>
-            <source src="videos/video1.mp4" type="video/mp4">
-        </video>
-        <video id="video2" class="background-video" muted loop playsinline>
-            <source src="videos/video2.mp4" type="video/mp4">
-        </video>
-        <div class="video-overlay"></div>
-    </div>
-
-    <div class="static-background" id="staticBg">
+    <div class="static-background">
         <div class="octopus-decoration">🐙</div>
         <div class="brand-watermark">Syntex Shop</div>
+    </div>
+
+    <!-- Purchase Modal -->
+    <div class="modal" id="purchaseModal">
+        <div class="modal-content">
+            <button class="modal-close" id="modalClose">✕</button>
+            <div class="modal-header">
+                <div class="modal-icon">🛒</div>
+                <h2 class="modal-title">Оформление заказа</h2>
+            </div>
+            <div class="modal-body">
+                <div class="product-info" id="modalProductInfo">
+                    <div class="product-info-icon">🎣</div>
+                    <div class="product-info-details">
+                        <h3 class="product-info-name">Legendary Rod</h3>
+                        <p class="product-info-price">1,499₽</p>
+                    </div>
+                </div>
+                <form class="purchase-form" id="purchaseForm">
+                    <div class="form-group">
+                        <label for="telegramInput">Ваш Telegram</label>
+                        <div class="input-wrapper">
+                            <span class="input-prefix">@</span>
+                            <input
+                                type="text"
+                                id="telegramInput"
+                                placeholder="username"
+                                required
+                                autocomplete="off"
+                            >
+                        </div>
+                        <p class="form-hint">Мы свяжемся с вами для завершения покупки</p>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-submit">
+                        Отправить заявку
+                    </button>
+                </form>
+            </div>
+        </div>
     </div>
 
     <nav class="navbar">
