@@ -255,44 +255,60 @@ function updateAnimations() {
 
 // Intersection Observer for scroll animations
 const observerOptions = {
-    threshold: 0.1,
-    rootMargin: '0px 0px -100px 0px'
+    threshold: 0.15,
+    rootMargin: '0px 0px -50px 0px'
 };
 
-function animateOnScroll() {
+const animationObserver = new IntersectionObserver((entries) => {
+    entries.forEach((entry, index) => {
+        if (entry.isIntersecting && !entry.target.classList.contains('visible')) {
+            // Add stagger delay based on data attribute or index
+            const delay = entry.target.dataset.delay || 0;
+            setTimeout(() => {
+                entry.target.classList.add('visible');
+            }, delay);
+        }
+    });
+}, observerOptions);
+
+// Observe all animatable elements
+function initScrollAnimations() {
     // Feature cards
     document.querySelectorAll('.feature-card').forEach((card, index) => {
-        const rect = card.getBoundingClientRect();
-        const windowHeight = window.innerHeight;
-
-        if (rect.top < windowHeight * 0.8) {
-            setTimeout(() => {
-                card.classList.add('visible');
-            }, index * 100);
-        }
+        card.dataset.delay = index * 100;
+        animationObserver.observe(card);
     });
 
     // Product cards
     document.querySelectorAll('.product-card').forEach((card, index) => {
-        const rect = card.getBoundingClientRect();
-        const windowHeight = window.innerHeight;
-
-        if (rect.top < windowHeight * 0.8) {
-            setTimeout(() => {
-                card.classList.add('visible');
-            }, index * 80);
-        }
+        card.dataset.delay = index * 80;
+        animationObserver.observe(card);
     });
 
     // Generic scroll animations
     document.querySelectorAll('.scroll-animate').forEach(element => {
-        const rect = element.getBoundingClientRect();
-        const windowHeight = window.innerHeight;
-
-        if (rect.top < windowHeight * 0.8) {
-            element.classList.add('visible');
-        }
+        animationObserver.observe(element);
     });
+
+    // Contact cards
+    document.querySelectorAll('.contact-card').forEach((card, index) => {
+        card.dataset.delay = index * 100;
+        animationObserver.observe(card);
+    });
+}
+
+function animateOnScroll() {
+    // Fallback for browsers without IntersectionObserver
+    if (!('IntersectionObserver' in window)) {
+        document.querySelectorAll('.feature-card, .product-card, .scroll-animate, .contact-card').forEach(element => {
+            const rect = element.getBoundingClientRect();
+            const windowHeight = window.innerHeight;
+
+            if (rect.top < windowHeight * 0.8 && !element.classList.contains('visible')) {
+                element.classList.add('visible');
+            }
+        });
+    }
 }
 
 // Smooth scroll for anchor links
@@ -321,20 +337,45 @@ window.addEventListener('load', () => {
     document.querySelectorAll('.section-title, .section-subtitle').forEach(el => {
         el.classList.add('scroll-animate');
     });
+
+    // Initialize scroll animations with IntersectionObserver
+    initScrollAnimations();
+
+    // Animate hero stats on load
+    const stats = document.querySelectorAll('.stat-item');
+    stats.forEach((stat, index) => {
+        stat.style.opacity = '0';
+        stat.style.transform = 'translateY(20px)';
+
+        setTimeout(() => {
+            stat.style.transition = 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+            stat.style.opacity = '1';
+            stat.style.transform = 'translateY(0)';
+        }, 300 + (index * 150));
+    });
 });
 
 // Parallax effect for decorative elements
+let parallaxTicking = false;
+
 window.addEventListener('scroll', () => {
-    const scrolled = window.scrollY;
-    const octopus = document.querySelector('.octopus-decoration');
-    const watermark = document.querySelector('.brand-watermark');
+    if (!parallaxTicking) {
+        window.requestAnimationFrame(() => {
+            const scrolled = window.scrollY;
+            const octopus = document.querySelector('.octopus-decoration');
+            const watermark = document.querySelector('.brand-watermark');
 
-    if (octopus) {
-        octopus.style.transform = `rotate(-15deg) translateY(${scrolled * 0.1}px)`;
-    }
+            if (octopus) {
+                octopus.style.transform = `rotate(-15deg) translateY(${scrolled * 0.1}px)`;
+            }
 
-    if (watermark) {
-        watermark.style.transform = `translate(-50%, -50%) rotate(-3deg) translateY(${scrolled * 0.05}px)`;
+            if (watermark) {
+                watermark.style.transform = `translate(-50%, -50%) rotate(-3deg) translateY(${scrolled * 0.05}px)`;
+            }
+
+            parallaxTicking = false;
+        });
+        parallaxTicking = true;
     }
 }, { passive: true });
 
@@ -347,6 +388,11 @@ window.addEventListener('load', () => {
 
         setTimeout(() => {
             stat.style.transition = 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+            stat.style.opacity = '1';
+            stat.style.transform = 'translateY(0)';
+        }, 300 + (index * 150));
+    });
+});
             stat.style.opacity = '1';
             stat.style.transform = 'translateY(0)';
         }, 1000 + (index * 150));
