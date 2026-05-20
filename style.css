@@ -1212,8 +1212,6 @@ body {
     .input-wrapper input {
         font-size: 16px; /* Prevent zoom on iOS */
     }
-}
-    }
 
     .modal-content {
         border-radius: 20px;

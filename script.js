@@ -148,9 +148,22 @@ modal.addEventListener('click', (e) => {
 purchaseForm.addEventListener('submit', (e) => {
     e.preventDefault();
 
-    const telegram = telegramInput.value.trim();
+    let telegram = telegramInput.value.trim();
 
     if (!telegram) {
+        telegramInput.focus();
+        return;
+    }
+
+    // Remove @ if user added it
+    if (telegram.startsWith('@')) {
+        telegram = telegram.substring(1);
+    }
+
+    // Validate telegram username (alphanumeric, underscore, 5-32 chars)
+    const telegramRegex = /^[a-zA-Z0-9_]{5,32}$/;
+    if (!telegramRegex.test(telegram)) {
+        alert('Неверный формат Telegram username. Используйте только буквы, цифры и подчеркивание (5-32 символа).');
         telegramInput.focus();
         return;
     }
@@ -183,6 +196,17 @@ purchaseForm.addEventListener('submit', (e) => {
         telegram: telegram,
         timestamp: new Date().toISOString()
     });
+
+    // TODO: Send to backend API
+    // fetch('/api/orders', {
+    //     method: 'POST',
+    //     headers: { 'Content-Type': 'application/json' },
+    //     body: JSON.stringify({
+    //         product: currentProduct,
+    //         telegram: telegram,
+    //         timestamp: new Date().toISOString()
+    //     })
+    // });
 });
 
 // Keyboard shortcuts
@@ -379,25 +403,6 @@ window.addEventListener('scroll', () => {
     }
 }, { passive: true });
 
-// Add stagger animation to hero stats
-window.addEventListener('load', () => {
-    const stats = document.querySelectorAll('.stat-item');
-    stats.forEach((stat, index) => {
-        stat.style.opacity = '0';
-        stat.style.transform = 'translateY(20px)';
-
-        setTimeout(() => {
-            stat.style.transition = 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
-            stat.style.opacity = '1';
-            stat.style.transform = 'translateY(0)';
-        }, 300 + (index * 150));
-    });
-});
-            stat.style.opacity = '1';
-            stat.style.transform = 'translateY(0)';
-        }, 1000 + (index * 150));
-    });
-});
 
 // Counter animation for stats
 const statsObserver = new IntersectionObserver((entries) => {
@@ -464,8 +469,14 @@ document.querySelectorAll('.product-card').forEach(card => {
 
 // Reduce motion for users who prefer it
 if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    document.querySelectorAll('*').forEach(el => {
-        el.style.animation = 'none';
-        el.style.transition = 'none';
-    });
+    // Disable animations
+    const style = document.createElement('style');
+    style.textContent = `
+        *, *::before, *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+        }
+    `;
+    document.head.appendChild(style);
 }
